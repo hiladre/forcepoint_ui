@@ -1,9 +1,9 @@
 import re
 
-from base_page import BasePage
 from maps.button_map import ButtonMap
 from maps.form_map import FormMap
 from maps.social_media_map import SocialMedia
+from pages.base_page import BasePage
 
 
 class UltimatePage(BasePage):

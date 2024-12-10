@@ -1,8 +1,10 @@
 import os
-
 import pytest
-from playwright.async_api import async_playwright
 from playwright.sync_api import sync_playwright
+
+# Create a folder for screenshots if it doesn't exist
+SCREENSHOT_DIR = "screenshots"
+os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
 
 @pytest.fixture(scope="session")
@@ -29,44 +31,15 @@ def page(browser):
     context.close()
 
 
-@pytest.fixture(scope="class")
-async def browser_context(request):
-    """Set up and tear down resources at the class level using async API."""
-    async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=False)
-        context = await browser.new_context()
-        page = await context.new_page()
-
-        # Attach resources to the test class instance
-        request.cls.playwright = playwright
-        request.cls.browser = browser
-        request.cls.context = context
-        request.cls.page = page
-
-        yield  # Run the tests
-
-        # Clean up resources after the tests
-        await page.close()
-        await context.close()
-        await browser.close()
-
-
-# Create a folder for screenshots if it doesn't exist
-SCREENSHOT_DIR = "screenshots"
-os.makedirs(SCREENSHOT_DIR, exist_ok=True)
-
 @pytest.hookimpl(tryfirst=True)
 def pytest_exception_interact(node, call, report):
     """Take a screenshot when a test fails."""
-    # Check if the test failed and the test node has a 'page' attribute
-    if report.failed and hasattr(node.instance, "page"):
-        page = node.instance.page
+    if report.failed and hasattr(node.instance, "example_page"):
+        page = node.instance.example_page.page  # Access the `page` from `example_page`
         test_name = node.name
         screenshot_path = os.path.join(SCREENSHOT_DIR, f"{test_name}.png")
         try:
-            # Capture the screenshot
             page.screenshot(path=screenshot_path)
             print(f"Screenshot saved: {screenshot_path}")
         except Exception as e:
             print(f"Failed to take screenshot: {e}")
-

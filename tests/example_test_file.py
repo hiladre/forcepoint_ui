@@ -1,12 +1,12 @@
-from pages.example_page import UltimatePage
 import pytest
+from pages.example_page import UltimatePage
 
 
-@pytest.mark.usefixtures("browser_context")
+@pytest.mark.usefixtures("page")
 class TestExample:
-
     @pytest.fixture(autouse=True)
     def setup(self, page):
+        # Initialize the page object
         self.example_page = UltimatePage(page)
 
     def test_button_count(self):
@@ -18,6 +18,3 @@ class TestExample:
 
     def test_form(self):
         self.example_page.fill_submit_form(name="hila", email="hila@gmail.com", message="blabla")
-
-
-
